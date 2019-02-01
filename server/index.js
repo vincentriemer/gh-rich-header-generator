@@ -42,22 +42,33 @@ const fonts = {
   }
 };
 
-module.exports = (req, res) => {
-  const { query, pathname } = parse(req.url, true);
+function sendBadRequest() {
+  res.statusCode = 400;
+  res.end("Bad Request", "utf8");
+}
 
-  if (pathname !== "/header") {
-    res.statusCode = 400;
-    res.end("Bad Request", "utf8");
-    return;
-  }
+module.exports = (req, res) => {
+  const { query } = parse(req.url, true);
 
   const { text, size = "h1", weight = "medium", color = "black" } = query;
 
+  if (text === "" || text == null) {
+    sendBadRequest();
+    return;
+  }
+
+  const fontSize = sizes[size];
   const fontConfig = fonts[weight];
+  const fontColor = colors[color];
+
+  if (fontSize == null || fontConfig == null || fontColor == null) {
+    sendBadRequest();
+    return;
+  }
 
   const options = {
-    color: colors[color],
-    font: `${sizes[size]}px ${fontConfig.localFontName}`,
+    color: fontColor,
+    font: `${fontSize}px ${fontConfig.localFontName}`,
     ...fontConfig,
     paddingBottom: 1,
     output: "stream"

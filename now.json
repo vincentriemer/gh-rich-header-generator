@@ -1,13 +1,26 @@
 {
   "version": 2,
   "name": "gh-text",
-  "alias": ["ghtext.vincentriemer.com"],
+  "alias": ["gh-header.vincentriemer.com"],
   "builds": [
     {
-      "src": "index.js",
+      "src": "server/index.js",
       "use": "@now/node",
       "config": { "maxLambdaSize": "30mb" }
+    },
+    {
+      "src": "client/**",
+      "use": "@now/static"
     }
   ],
-  "routes": [{ "src": "/.*", "dest": "/index.js" }]
+  "routes": [
+    { "src": "/header", "dest": "/server/index.js" },
+    {
+      "src": "/(.*)",
+      "dest": "/client/$1",
+      "headers": {
+        "Cache-Control": "max-age=60, s-maxage=31536000"
+      }
+    }
+  ]
 }

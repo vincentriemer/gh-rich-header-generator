@@ -7,12 +7,9 @@
     "canvas": "^2.3.1"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.13.0",
-    "micro": "^9.3.3",
-    "micro-dev": "^3.0.0"
+    "nodemon": "^1.18.9"
   },
   "scripts": {
-    "start": "micro-dev",
-    "build": "ncc build index.js -o dist"
+    "develop": "nodemon --watch client --watch server --watch dev.js -e html,css,js ./dev.js"
   }
 }

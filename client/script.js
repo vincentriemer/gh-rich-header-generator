@@ -201,10 +201,7 @@ function generateOutput(text, size, weight, color, align) {
         }
       }
 
-      if (
-        document.getElementById("hljs-script") == null ||
-        document.getElementById("hljs-style")
-      ) {
+      if (window.hljs == null) {
         Promise.all([loadHLJSScript(), loadHLJSStyle()]).then(
           highlightAndAppend.bind(null, resultOutput)
         );

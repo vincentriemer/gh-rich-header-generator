@@ -1,6 +1,7 @@
 const path = require("path");
 const { parse } = require("url");
 const text2png = require("./text2png");
+const accepts = require("accepts");
 
 const sizes = {
   h1: 32,
@@ -48,7 +49,7 @@ function sendBadRequest() {
 }
 
 module.exports = (req, res) => {
-  const { query } = parse(req.url, true);
+  const { query, href } = parse(req.url, true);
 
   const { text, size = "h1", weight = "medium", color = "black" } = query;
 
@@ -74,9 +75,36 @@ module.exports = (req, res) => {
     output: "stream"
   };
 
-  const imgStream = text2png(text, options);
+  const accept = accepts(req);
+  if (accept.type(["image/png", "html"]) === "image/png") {
+    const imgStream = text2png(text, options);
 
-  res.setHeader("Content-Type", "image/png");
-  res.setHeader("Cache-Control", "max-age=0, s-maxage=31536000");
-  imgStream.pipe(res);
+    res.setHeader("Content-Type", "image/png");
+    res.setHeader("Cache-Control", "max-age=0, s-maxage=31536000");
+    imgStream.pipe(res);
+  } else {
+    const { align } = query;
+
+    options.output = "canvas";
+    const imgCanvas = text2png(text, options);
+
+    var hostname = req.headers.host;
+
+    const TAB = "  ";
+    const htmlSrc = [
+      "<!-- Copy the following html into your README.md -->",
+      "",
+      "<" + size + ' align="' + align + '">',
+      TAB.repeat(1) + "<img",
+      TAB.repeat(2) + 'width="' + imgCanvas.width.toString() + '"',
+      TAB.repeat(2) + 'alt="' + text + '"',
+      TAB.repeat(2) + 'src="' + "https://" + hostname + href + '"',
+      TAB.repeat(1) + "/>",
+      "</" + size + ">"
+    ].join("\n");
+
+    res.setHeader("Content-Type", "text/plain");
+    res.write(htmlSrc);
+    res.end();
+  }
 };

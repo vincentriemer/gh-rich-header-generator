@@ -104,6 +104,7 @@ module.exports = (req, res) => {
     ].join("\n");
 
     res.setHeader("Content-Type", "text/plain");
+    res.setHeader("Cache-Control", "max-age=0, s-maxage=31536000");
     res.write(htmlSrc);
     res.end();
   }
